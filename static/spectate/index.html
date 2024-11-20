@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regarder et parier au jeu des chevaux</title>
+  <link rel="stylesheet" href="/globals.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+</head>
+
+<body>
+  <main>
+    <header>
+      <a id="back-home" href="/index.html" class="">
+        <button id="play">Acceuil</button>
+      </a>
+      <h1>Course</h1>
+    </header>
+    <div id="game-container">
+      <div id="track">
+        <div class="horses">
+          <div class="horse-track">
+            <img class="horse" src="/assets/cheval.png" width="100" height="100" alt="Cheval">
+            <div class="ground"></div>
+          </div>
+          <div class="horse-track">
+            <img class="horse" src="/assets/cheval.png" width="100" height="100" alt="Cheval">
+            <div class="ground"></div>
+          </div>
+          <div class="horse-track">
+            <img class="horse" src="/assets/cheval.png" width="100" height="100" alt="Cheval">
+            <div class="ground"></div>
+          </div>
+          <div class="horse-track">
+            <img class="horse" src="/assets/cheval.png" width="100" height="100" alt="Cheval">
+            <div class="ground"></div>
+          </div>
+        </div>
+        <div id="finish-line"></div>
+      </div>
+      <div id="stats">
+        <h3>Classement :</h3>
+        <ol>
+          <li>
+            Joueur 1
+          </li>
+          <li>
+            Joueur 2
+          </li>
+          <li>
+            Joueur 3
+          </li>
+          <li>
+            Joueur 4
+          </li>
+        </ol>
+      </div>
+    </div>
+    <div id="press-to-start">
+      <p>Faites vos paris !</p>
+      <div id="bets">
+        <button>Parier +10 coins sur J1</button>
+        <button>Parier +10 coins sur J2</button>
+        <button>Parier +10 coins sur J3</button>
+        <button>Parier +10 coins sur J4</button>
+      </div>
+    </div>
+  </main>
+</body>
+
+</html>

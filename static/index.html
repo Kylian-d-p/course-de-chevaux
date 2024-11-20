@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jeu des chevaux</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="globals.css">
+  <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+</head>
+
+<body>
+  <main>
+    <div id="home-play-items">
+      <h1 id="title">Jeu des chevaux</h1>
+      <div>
+        <form action="/play/index.html" method="get">
+          <button>Créer une partie</button>
+        </form>
+        <span class="or">
+          <div></div>
+          ou
+          <div></div>
+        </span>
+        <form action="/play/index.html" method="get">
+          <input type="text" name="code" placeholder="Code de partie" required minlength="6" maxlength="6">
+          <button>Rejoindre</button>
+        </form>
+        <span class="or">
+          <div></div>
+          ou
+          <div></div>
+        </span>
+        <form action="/spectate/index.html" method="get">
+          <input type="text" name="code" placeholder="Code de partie" required minlength="6" maxlength="6">
+          <button>Regarder</button>
+        </form>
+      </div>
+    </div>
+    <a id="show-leaderboard" href="leaderboard/index.html">
+      <button id="leaderboard">Classement</button>
+    </a>
+  </main>
+</body>
+
+</html>

@@ -1,12 +1,19 @@
+import { Server as SocketIoServer } from "socket.io";
+import { v4 as uuid } from "uuid";
 import { z } from "zod";
 import { Player } from "./player";
 import { types } from "./types";
 
 export class Game {
-  private players: Player[];
+  static MAX_PLAYERS = 4;
+  private players: Player[] = [];
+  private id: string;
   private winner: string | undefined;
+  private running = false;
+  private io: SocketIoServer;
 
   constructor(params: z.infer<typeof types.gameConstructorParams>) {
+    this.id = uuid();
     const checkedParams = types.gameConstructorParams.safeParse(params);
 
     if (!checkedParams.success) {
@@ -15,22 +22,44 @@ export class Game {
       );
     }
 
-    const { players } = checkedParams.data;
+    const { players, io } = checkedParams.data;
 
-    this.players = [
-      new Player(players[0]),
-      new Player(players[1]),
-      new Player(players[2]),
-      new Player(players[3]),
-    ];
+    for (const player of players) {
+      this.addPlayer({ name: player });
+    }
+
+    this.io = io;
   }
 
-  getGameStatus() {
+  isRunning() {
+    return this.running;
+  }
+
+  getId() {
+    return this.id;
+  }
+
+  getPlayers() {
     return this.players;
   }
 
-  addPlayerProgress(params: z.infer<typeof types.gamePlayerProgressParams>) {
-    const checkedParams = types.gamePlayerProgressParams.safeParse(params);
+  run() {}
+
+  addPlayer(params: z.infer<typeof types.gameAddPlayer>) {
+    const checkedParams = types.gameAddPlayer.safeParse(params);
+
+    if (!checkedParams.success) {
+      throw new Error("Les paramètres pour ajouter un joueur sont invalides.");
+    }
+
+    const { name } = checkedParams.data;
+
+    this.players.push(new Player(name));
+    this.sendPlayersUpdate();
+  }
+
+  addPlayerProgress(params: z.infer<typeof types.gameAddPlayerProgressParams>) {
+    const checkedParams = types.gameAddPlayerProgressParams.safeParse(params);
 
     if (!checkedParams.success) {
       throw new Error(
@@ -47,5 +76,16 @@ export class Game {
     }
 
     this.players[playerIndex].addProgress({ increment });
+    this.sendPlayersUpdate();
+  }
+
+  private sendPlayersUpdate() {
+    this.io.to(`play-${this.id}`).emit(
+      "players update",
+      this.players.map((player) => ({
+        name: player.getName(),
+        progress: player.getProgress(),
+      }))
+    );
   }
 }

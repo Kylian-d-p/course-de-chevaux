@@ -1,0 +1,42 @@
+main{
+  min-height: 100dvh;
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-items: center;
+  background-image: url("/assets/ecurie.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+#back-home {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+}
+
+#leaderboard {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  color: #fff;
+  background-color: #00000064;
+  backdrop-filter: blur(2px);
+  padding: 20px;
+  border-radius: 10px;
+  width: calc(100% - 20px);
+  max-width: 640px;
+}
+
+#leaderboard table {
+  width: 100%;
+  text-align: center;
+  border-collapse: collapse;
+}
+
+#leaderboard table th, #leaderboard table td {
+  border-bottom: solid #a2a2a2 1px;
+  padding: 5px;
+}

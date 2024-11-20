@@ -1,3 +1,4 @@
+import { Server as SocketIoServer } from "socket.io";
 import { z } from "zod";
 
 export const types = {
@@ -12,10 +13,18 @@ export const types = {
         message: "La variable d'environnement PORT doit être un nombre",
       }),
   }),
-  gameConstructorParams: z.object({ players: z.array(z.string()).length(4) }),
-  gamePlayerProgressParams: z.object({
+  gameConstructorParams: z.object({
+    players: z.array(z.string()),
+    io: z.custom<SocketIoServer>(),
+  }),
+  gameAddPlayerProgressParams: z.object({
     playerIndex: z.number(),
     increment: z.number(),
   }),
   playerAddProgressParams: z.object({ increment: z.number() }),
+  socketRequestRoomAccess: z.object({
+    id: z.string(),
+    playerPseudo: z.string().min(1).max(15),
+  }),
+  gameAddPlayer: z.object({ name: z.string() }),
 };

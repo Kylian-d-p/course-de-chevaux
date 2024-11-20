@@ -1,0 +1,72 @@
+main{
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-items: center;
+  background-image: url("/assets/ecurie.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+#home-play-items {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  backdrop-filter: blur(2px);
+  background-color: #00000064;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+h1#title {
+  color: #f3ebe5;
+  font-size: 3rem;
+  text-align: center;
+}
+
+#home-play-items > div {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#home-play-items form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#home-play-items .or {
+  text-align: center;
+  color: #fff;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+}
+
+#home-play-items .or div {
+  width: 100%;
+  background-color: #fff;
+  height: 1px;
+}
+
+#home-play-items form input {
+  width: 100%;
+}
+
+#home-play-items form button{
+  font-size: 1.5rem;
+  width: 100%;
+  text-align: center;
+}
+
+a#show-leaderboard{
+  position: fixed;
+  top: 10px;
+  left: 10px;
+}
