@@ -12,24 +12,34 @@ export const types = {
       .refine((str) => !Number.isNaN(Number(str)), {
         message: "La variable d'environnement PORT doit être un nombre",
       }),
+    SESSION_SECRET: z.string({
+      required_error: "La variable d'environnement SESSION_SECRET est requise",
+      invalid_type_error: "La variable d'environnement SESSION_SECRET est requise",
+    }),
+    DATABASE_URL: z.string({
+      required_error: "La variable d'environnement DATABASE_URL est requise",
+      invalid_type_error: "La variable d'environnement DATABASE_URL est requise",
+    }),
   }),
   gameConstructorParams: z.object({
     players: z.array(z.string()),
     io: z.custom<SocketIoServer>(),
   }),
   gameAddPlayerProgressParams: z.object({
-    playerPseudo: z.number(),
+    playerPseudo: z.string(),
     increment: z.number(),
   }),
   playerAddProgressParams: z.object({ increment: z.number() }),
   socketRequestRoomAccess: z.object({
     id: z.string(),
-    playerPseudo: z.string().min(1).max(15),
   }),
   socketAddProgress: z.object({
-    playerPseudo: z.string().min(1).max(15),
     gameId: z.string(),
   }),
   gameAddPlayer: z.object({ name: z.string() }),
   gameRemovePlayer: z.object({ name: z.string() }),
+  appLoginBody: z.object({ pseudo: z.string(), password: z.string() }),
+  appRunBody: z.object({
+    gameId: z.string(),
+  }),
 };

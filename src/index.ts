@@ -1,8 +1,11 @@
+import bcrypt from "bcrypt";
 import dotenv from "dotenv";
-import express from "express";
+import express, { Request } from "express";
+import session from "express-session";
 import http from "http";
 import { Server as SocketIoServer } from "socket.io";
 import { z } from "zod";
+import { prisma } from "./database";
 import { Game } from "./game";
 import { types } from "./types";
 
@@ -16,22 +19,156 @@ if (!checkedEnv.success) {
 
 const env = checkedEnv.data;
 
+declare module "express-session" {
+  interface SessionData {
+    user: {
+      id: string;
+      pseudo: string;
+    };
+  }
+}
+
 const app = express();
 const httpServer = http.createServer(app);
 const io = new SocketIoServer(httpServer);
+const sessionMiddleware = session({
+  secret: env.SESSION_SECRET,
+  name: "course-de-chevaux.SID",
+  resave: true,
+  saveUninitialized: true,
+});
 
 const games: Game[] = [];
 
+app.use(express.json());
+app.set("trust proxy", 1);
+app.use(sessionMiddleware);
 app.use("/", express.static("static"));
-app.post("/api/room/create", (_, res) => {
+
+app.get("/api/leaderboard", async (req, res) => {
+  const leaderboard = await prisma.players.findMany({
+    where: {
+      bestTime: {
+        not: null,
+      },
+    },
+    take: 15,
+    orderBy: {
+      bestTime: "asc",
+    },
+  });
+  res.json({ leaderboard: leaderboard.map((player) => ({ name: player.pseudo, time: player.bestTime })) });
+  return;
+});
+
+app.post("/api/room/create", (req, res) => {
+  if (!req.session.user) {
+    res.status(401).json({ message: "Vous devez être connecté pour lancer une partie" });
+    return;
+  }
   const game = new Game({ players: [], io });
   games.push(game);
 
   res.json({ data: { gameId: game.getId() } });
 });
 
+app.post("/api/room/run", (req, res) => {
+  if (!req.session.user) {
+    res.status(403).json({ message: "Vous devez être connecté pour lancer une partie" });
+    return;
+  }
+
+  const checkedBody = types.appRunBody.safeParse(req.body);
+
+  if (!checkedBody.success) {
+    res.status(400).json({ message: "Requête invalide" });
+    return;
+  }
+
+  const { gameId } = checkedBody.data;
+
+  const game = games.find((game) => game.getId() === gameId);
+
+  if (!game) {
+    res.status(404).json({ message: "Partie introuvable" });
+    return;
+  }
+
+  const player = game.getPlayers().find((player) => player.getName() === req.session.user!.pseudo);
+
+  if (!player) {
+    res.status(403).json({ message: "Vous ne participez pas à cette partie" });
+    return;
+  }
+
+  game.run();
+
+  res.json({ message: "Partie lancée" });
+});
+
+app.post("/api/auth/login", async (req, res) => {
+  if (req.session.user) {
+    res.status(403).json({ message: "Vous êtes déjà connecté" });
+    return;
+  }
+
+  const checkedBody = types.appLoginBody.safeParse(req.body);
+
+  if (!checkedBody.success) {
+    res.status(400).json({ message: "Requête invalide" });
+    return;
+  }
+
+  const { pseudo, password } = checkedBody.data;
+
+  const user = await prisma.players.findUnique({
+    where: {
+      pseudo,
+    },
+  });
+
+  if (!user) {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await prisma.players.create({
+      data: {
+        pseudo,
+        password: hashedPassword,
+      },
+    });
+
+    req.session.user = { id: newUser.id, pseudo: newUser.pseudo };
+  } else {
+    const comparePassword = await bcrypt.compare(password, user.password);
+
+    if (!comparePassword) {
+      res.status(401).json({ message: "Mot de passe incorrect" });
+      return;
+    }
+
+    req.session.user = { id: user.id, pseudo: user.pseudo };
+  }
+
+  res.json({ message: "Vous êtes connecté" });
+});
+
+io.engine.use(sessionMiddleware);
 io.on("connection", (socket) => {
+  const req = socket.request as Request;
+  socket.use((__, next) => {
+    req.session.reload((err) => {
+      if (err) {
+        socket.disconnect();
+      } else {
+        next();
+      }
+    });
+  });
+
   socket.on("request room access", (params: z.infer<typeof types.socketRequestRoomAccess>) => {
+    if (!req.session.user) {
+      return socket.emit("info", { message: "Vous devez être connecté", needAuth: true });
+    }
     const checkedParams = types.socketRequestRoomAccess.safeParse(params);
 
     if (!checkedParams.success) {
@@ -40,12 +177,12 @@ io.on("connection", (socket) => {
       });
     }
 
-    const { id, playerPseudo } = checkedParams.data;
+    const { id } = checkedParams.data;
 
     for (const room of socket.rooms) {
       if (room.startsWith("play-")) {
         return socket.emit("info", {
-          message: "Vous ne pouvez pas rejoindre plusieurs parties",
+          message: "Vous ne pouvez pas rejoindre plusieurs parties depuis la même fenêtre",
         });
       }
     }
@@ -65,29 +202,32 @@ io.on("connection", (socket) => {
       });
     } else {
       for (const player of game.getPlayers()) {
-        if (player.getName() === playerPseudo) {
+        if (player.getName() === req.session.user.pseudo) {
           return socket.emit("info", {
-            message: `Cette partie a déjà un joueur avec le pseudo ${playerPseudo}`,
+            message: `Vous êtes déjà dans cette partie`,
           });
         }
       }
     }
 
-    socket.data.name = playerPseudo;
+    socket.data.name = req.session.user.pseudo;
     socket.join(`play-${game.getId()}`);
-    game.addPlayer({ name: playerPseudo });
+    game.addPlayer({ name: req.session.user.pseudo });
   });
 
-  socket.emit("player progress", (params: z.infer<typeof types.socketAddProgress>) => {
+  socket.on("add progress", (params: z.infer<typeof types.socketAddProgress>) => {
     const checkedParams = types.socketAddProgress.safeParse(params);
 
     if (!checkedParams.success) {
       return socket.emit("info", { message: "Les paramètres d'ajout de progrès du joueurs sont incorrects" });
     }
 
-    const { playerPseudo, gameId } = checkedParams.data;
+    const { gameId } = checkedParams.data;
 
-    games.find(game => game.getId() === gameId)?.addPlayerProgress({increment: 4, name: playerPseudo})
+    const game = games.find((game) => game.getId() === gameId);
+    if (game && req.session.user) {
+      game.addPlayerProgress({ increment: 0.5, playerPseudo: req.session.user.pseudo });
+    }
   });
 
   socket.on("disconnecting", () => {
@@ -97,8 +237,7 @@ io.on("connection", (socket) => {
         if (temp.length !== 2) {
           return;
         }
-        const gameId = temp[1];
-        const gameIndex = games.findIndex((game) => game.getId() === gameId);
+        const gameIndex = games.findIndex((game) => game.getId() === temp[1]);
         if (gameIndex !== -1) {
           games[gameIndex].removePlayer({ name: socket.data.name });
           if (games[gameIndex].getPlayers().length === 0) {
@@ -115,5 +254,5 @@ io.on("connection", (socket) => {
 });
 
 httpServer.listen(env.PORT, () => {
-  console.log(`Server listening on port ${env.PORT}`);
+  console.log(`Server listening on port ${env.PORT} : http://localhost:${env.PORT}`);
 });

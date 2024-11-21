@@ -1,4 +1,4 @@
-main{
+main {
   min-height: 100dvh;
   display: flex;
   align-items: center;
@@ -59,13 +59,13 @@ h1#title {
   width: 100%;
 }
 
-#home-play-items form button{
+#home-play-items form button {
   font-size: 1.5rem;
   width: 100%;
   text-align: center;
 }
 
-a#show-leaderboard{
+a#show-leaderboard {
   position: fixed;
   top: 10px;
   left: 10px;

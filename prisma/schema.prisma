@@ -1,0 +1,17 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Players {
+  id       String @id @default(uuid())
+  pseudo   String @unique
+  password String
+  bestTime Float? @map("best_time")
+
+  @@map("players")
+}

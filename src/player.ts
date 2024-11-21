@@ -21,13 +21,15 @@ export class Player {
     const checkedParams = types.playerAddProgressParams.safeParse(params);
 
     if (!checkedParams.success) {
-      throw new Error(
-        "Les paramètres d'ajout du progrès d'un joueur sont invalides"
-      );
+      throw new Error("Les paramètres d'ajout du progrès d'un joueur sont invalides");
     }
 
     const { increment } = checkedParams.data;
 
     this.progress += increment;
+  }
+
+  resetProgress() {
+    this.progress = 0;
   }
 }
