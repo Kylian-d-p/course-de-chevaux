@@ -23,60 +23,92 @@ const io = new SocketIoServer(httpServer);
 const games: Game[] = [];
 
 app.use("/", express.static("static"));
+app.post("/api/room/create", (_, res) => {
+  const game = new Game({ players: [], io });
+  games.push(game);
 
-io.of("/room").on("connection", (socket) => {
-  socket.on(
-    "request room access",
-    (params: z.infer<typeof types.socketRequestRoomAccess>) => {
-      const checkedParams = types.socketRequestRoomAccess.safeParse(params);
+  res.json({ data: { gameId: game.getId() } });
+});
 
-      if (!checkedParams.success) {
+io.on("connection", (socket) => {
+  socket.on("request room access", (params: z.infer<typeof types.socketRequestRoomAccess>) => {
+    const checkedParams = types.socketRequestRoomAccess.safeParse(params);
+
+    if (!checkedParams.success) {
+      return socket.emit("info", {
+        message: "Impossible de rejoindre cette partie",
+      });
+    }
+
+    const { id, playerPseudo } = checkedParams.data;
+
+    for (const room of socket.rooms) {
+      if (room.startsWith("play-")) {
         return socket.emit("info", {
-          message: "Impossible de rejoindre cette partie",
+          message: "Vous ne pouvez pas rejoindre plusieurs parties",
         });
       }
+    }
 
-      const { id, playerPseudo } = checkedParams.data;
-      // if (Array(socket.rooms).find()) { VERIFIER QUE LE JOUEUR N'AI REJOINT QU'UNE PARTIE
-      //   return socket.emit("info", {
-      //     message: "Vous ne pouvez pas rejoindre plusieurs parties"
-      //   })
-      // }
+    const room = io.sockets.adapter.rooms.get(`play-${id}`);
 
-      const room = io.sockets.adapter.rooms.get(`play-${id}`);
+    if (room && room.size >= Game.MAX_PLAYERS) {
+      return socket.emit("info", {
+        message: `Cette partie est pleine : ${Game.MAX_PLAYERS} joueurs maximum`,
+      });
+    }
 
-      if (room && room.size < Game.MAX_PLAYERS) {
-        return socket.emit("info", {
-          message: `Cette partie est pleine : ${Game.MAX_PLAYERS} joueurs maximum`,
-        });
-      }
-
-      let game = games.find((game) => game.getId() === id);
-      if (!game) {
-        games.push(new Game({ players: [], io }));
-        game = games[games.length - 1];
-      } else {
-        for (const player of game.getPlayers()) {
-          if (player.getName() === playerPseudo) {
-            return socket.emit("info", {
-              message: `Cette partie a déjà un joueur avec le pseudo ${playerPseudo}`,
-            });
-          }
+    let game = games.find((game) => game.getId() === id);
+    if (!game) {
+      return socket.emit("info", {
+        message: "Cette partie n'existe pas",
+      });
+    } else {
+      for (const player of game.getPlayers()) {
+        if (player.getName() === playerPseudo) {
+          return socket.emit("info", {
+            message: `Cette partie a déjà un joueur avec le pseudo ${playerPseudo}`,
+          });
         }
       }
-
-      socket.data.name = playerPseudo;
-      socket.join(`play-${id}`);
-      game.addPlayer({ name: playerPseudo });
     }
-  );
+
+    socket.data.name = playerPseudo;
+    socket.join(`play-${game.getId()}`);
+    game.addPlayer({ name: playerPseudo });
+  });
+
+  socket.emit("player progress", (params: z.infer<typeof types.socketAddProgress>) => {
+    const checkedParams = types.socketAddProgress.safeParse(params);
+
+    if (!checkedParams.success) {
+      return socket.emit("info", { message: "Les paramètres d'ajout de progrès du joueurs sont incorrects" });
+    }
+
+    const { playerPseudo, gameId } = checkedParams.data;
+
+    games.find(game => game.getId() === gameId)?.addPlayerProgress({increment: 4, name: playerPseudo})
+  });
 
   socket.on("disconnecting", () => {
-    console.log("disc");
     for (const room of socket.rooms) {
       if (room !== socket.id) {
-        console.log(socket.data.name);
-        // games.find(game => game.getId() === room)?.removePlayer(socket)
+        const temp = room.split("play-");
+        if (temp.length !== 2) {
+          return;
+        }
+        const gameId = temp[1];
+        const gameIndex = games.findIndex((game) => game.getId() === gameId);
+        if (gameIndex !== -1) {
+          games[gameIndex].removePlayer({ name: socket.data.name });
+          if (games[gameIndex].getPlayers().length === 0) {
+            setTimeout(() => {
+              if (games[gameIndex].getPlayers().length === 0) {
+                games.splice(gameIndex, 1);
+              }
+            }, 5000);
+          }
+        }
       }
     }
   });

@@ -17,9 +17,7 @@ export class Game {
     const checkedParams = types.gameConstructorParams.safeParse(params);
 
     if (!checkedParams.success) {
-      throw new Error(
-        "Les paramètres de création de la partie sont invalides."
-      );
+      throw new Error("Les paramètres de création de la partie sont invalides.");
     }
 
     const { players, io } = checkedParams.data;
@@ -62,20 +60,30 @@ export class Game {
     const checkedParams = types.gameAddPlayerProgressParams.safeParse(params);
 
     if (!checkedParams.success) {
-      throw new Error(
-        "Les paramètres pour augmenter la progression d'un joueur dans la partie sont invalides."
-      );
+      throw new Error("Les paramètres pour augmenter la progression d'un joueur dans la partie sont invalides.");
     }
 
-    const { playerIndex, increment } = checkedParams.data;
+    const { playerPseudo, increment } = checkedParams.data;
 
-    if (playerIndex + 1 > this.players.length || playerIndex < 0) {
-      throw new Error(
-        "Le joueur auquel vous essayez d'augmenter la progression n'existe pas"
-      );
+    // this.players[playerIndex].addProgress({ increment });
+    this.sendPlayersUpdate();
+  }
+
+  removePlayer(params: z.infer<typeof types.gameRemovePlayer>) {
+    const checkedParams = types.gameRemovePlayer.safeParse(params);
+
+    if (!checkedParams.success) {
+      throw new Error("Les paramètres pour supprimer un joueur sont invalides.");
     }
 
-    this.players[playerIndex].addProgress({ increment });
+    const { name } = checkedParams.data;
+
+    const playerIndex = this.players.findIndex((player) => player.getName() === name);
+
+    if (playerIndex !== -1) {
+      this.players.splice(playerIndex, 1);
+    }
+
     this.sendPlayersUpdate();
   }
 
