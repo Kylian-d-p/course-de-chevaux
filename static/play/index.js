@@ -40,7 +40,7 @@ if (typeof gameId !== "string") {
     });
 
     players
-      .sort((a, b) => a.progress - b.progress)
+      .sort((a, b) => b.progress - a.progress)
       .forEach((player, i) => {
         leaderboardPlayerElements[i].innerText = player.name;
       });
