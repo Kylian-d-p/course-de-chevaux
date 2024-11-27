@@ -135,6 +135,21 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("bet coins", (params: z.infer<typeof types.socketBetCoins>) => {
+    const checkedParams = types.socketBetCoins.safeParse(params);
+
+    if (!checkedParams.success) {
+      return socket.emit("info", { message: "Les paramètres de pari de pièces sont incorrects" });
+    }
+
+    const { gameId, amount } = checkedParams.data;
+
+    const game = games.find(game => game.getId() === gameId)
+    if (game && req.session.user) {
+      game
+    }
+  });
+
   socket.on("disconnecting", () => {
     for (const room of socket.rooms) {
       if (room !== socket.id) {

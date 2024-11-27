@@ -14,6 +14,7 @@ export class Game {
   private readyForNext = true;
   private io: SocketIoServer;
   private startTime = new Date();
+  private bets: {playerId: string, bettors: {bettorId: string, amount: number}[]}[] = [];
 
   constructor(params: z.infer<typeof types.gameConstructorParams>) {
     this.id = uuid();
@@ -38,6 +39,13 @@ export class Game {
 
   getPlayers() {
     return this.players;
+  }
+
+  betCoins(bettorId: string, playerId: string, amount: number) {
+    // let betIndex = this.bets.findIndex(bet => bet.playerId === playerId)
+    // if (!bet) {
+    //   bet = 
+    // }
   }
 
   run() {
