@@ -17,7 +17,7 @@ fetch("/api/auth/user").then((res) => {
 
 pseudo.addEventListener("click", (event) => {
   if (event.target.getAttribute("data-connected")) {
-    fetch("/api/auth/logout", {method: "POST"}).then(() => {
+    fetch("/api/auth/logout", { method: "POST" }).then(() => {
       document.location.reload();
     });
   }

@@ -8,7 +8,8 @@
   <link rel="stylesheet" href="/globals.css">
   <link rel="stylesheet" href="style.css">
   <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
-  <script src="index.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="index.js" defer></script>
 </head>
 
 <body>
@@ -60,12 +61,12 @@
       </div>
     </div>
     <div id="press-to-start">
-      <p>Faites vos paris !</p>
+      <p id="jackpot"></p>
       <div id="bets">
-        <button>Parier +10 coins sur J1</button>
-        <button>Parier +10 coins sur J2</button>
-        <button>Parier +10 coins sur J3</button>
-        <button>Parier +10 coins sur J4</button>
+        <button class="bet">Parier +10 coins sur J1</button>
+        <button class="bet">Parier +10 coins sur J2</button>
+        <button class="bet">Parier +10 coins sur J3</button>
+        <button class="bet">Parier +10 coins sur J4</button>
       </div>
     </div>
   </main>
