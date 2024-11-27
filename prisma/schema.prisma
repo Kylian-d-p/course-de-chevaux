@@ -12,6 +12,7 @@ model Players {
   pseudo   String @unique
   password String
   bestTime Float? @map("best_time")
+  coins    Int    @default(1000)
 
   @@map("players")
 }
