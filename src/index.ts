@@ -1,11 +1,14 @@
-import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import express, { Request } from "express";
 import session from "express-session";
 import http from "http";
 import { Server as SocketIoServer } from "socket.io";
 import { z } from "zod";
-import { prisma } from "./database";
+import { createRoomController } from "./controllers/create-room";
+import { leaderboardController } from "./controllers/leaderboard";
+import { loginController } from "./controllers/login";
+import { runRoomController } from "./controllers/run-room";
+import { userController } from "./controllers/user";
 import { Game } from "./game";
 import { types } from "./types";
 
@@ -30,7 +33,7 @@ declare module "express-session" {
 
 const app = express();
 const httpServer = http.createServer(app);
-const io = new SocketIoServer(httpServer);
+export const io = new SocketIoServer(httpServer);
 const sessionMiddleware = session({
   secret: env.SESSION_SECRET,
   name: "course-de-chevaux.SID",
@@ -38,119 +41,18 @@ const sessionMiddleware = session({
   saveUninitialized: true,
 });
 
-const games: Game[] = [];
+export const games: Game[] = [];
 
 app.use(express.json());
 app.set("trust proxy", 1);
 app.use(sessionMiddleware);
 app.use("/", express.static("static"));
 
-app.get("/api/leaderboard", async (req, res) => {
-  const leaderboard = await prisma.players.findMany({
-    where: {
-      bestTime: {
-        not: null,
-      },
-    },
-    take: 15,
-    orderBy: {
-      bestTime: "asc",
-    },
-  });
-  res.json({ leaderboard: leaderboard.map((player) => ({ name: player.pseudo, time: player.bestTime })) });
-  return;
-});
-
-app.post("/api/room/create", (req, res) => {
-  if (!req.session.user) {
-    res.status(401).json({ message: "Vous devez être connecté pour lancer une partie" });
-    return;
-  }
-  const game = new Game({ players: [], io });
-  games.push(game);
-
-  res.json({ data: { gameId: game.getId() } });
-});
-
-app.post("/api/room/run", (req, res) => {
-  if (!req.session.user) {
-    res.status(403).json({ message: "Vous devez être connecté pour lancer une partie" });
-    return;
-  }
-
-  const checkedBody = types.appRunBody.safeParse(req.body);
-
-  if (!checkedBody.success) {
-    res.status(400).json({ message: "Requête invalide" });
-    return;
-  }
-
-  const { gameId } = checkedBody.data;
-
-  const game = games.find((game) => game.getId() === gameId);
-
-  if (!game) {
-    res.status(404).json({ message: "Partie introuvable" });
-    return;
-  }
-
-  const player = game.getPlayers().find((player) => player.getName() === req.session.user!.pseudo);
-
-  if (!player) {
-    res.status(403).json({ message: "Vous ne participez pas à cette partie" });
-    return;
-  }
-
-  game.run();
-
-  res.json({ message: "Partie lancée" });
-});
-
-app.post("/api/auth/login", async (req, res) => {
-  if (req.session.user) {
-    res.status(403).json({ message: "Vous êtes déjà connecté" });
-    return;
-  }
-
-  const checkedBody = types.appLoginBody.safeParse(req.body);
-
-  if (!checkedBody.success) {
-    res.status(400).json({ message: "Requête invalide" });
-    return;
-  }
-
-  const { pseudo, password } = checkedBody.data;
-
-  const user = await prisma.players.findUnique({
-    where: {
-      pseudo,
-    },
-  });
-
-  if (!user) {
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = await prisma.players.create({
-      data: {
-        pseudo,
-        password: hashedPassword,
-      },
-    });
-
-    req.session.user = { id: newUser.id, pseudo: newUser.pseudo };
-  } else {
-    const comparePassword = await bcrypt.compare(password, user.password);
-
-    if (!comparePassword) {
-      res.status(401).json({ message: "Mot de passe incorrect" });
-      return;
-    }
-
-    req.session.user = { id: user.id, pseudo: user.pseudo };
-  }
-
-  res.json({ message: "Vous êtes connecté" });
-});
+app.get("/api/leaderboard", leaderboardController);
+app.post("/api/room/create", createRoomController);
+app.post("/api/room/run", runRoomController);
+app.post("/api/auth/login", loginController);
+app.get("/api/auth/user", userController);
 
 io.engine.use(sessionMiddleware);
 io.on("connection", (socket) => {
