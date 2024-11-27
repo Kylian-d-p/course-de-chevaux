@@ -36,6 +36,10 @@ export const types = {
   socketAddProgress: z.object({
     gameId: z.string(),
   }),
+  socketBetCoins: z.object({
+    gameId: z.string(),
+    amount: z.number(),
+  }),
   gameAddPlayer: z.object({ name: z.string() }),
   gameRemovePlayer: z.object({ name: z.string() }),
   appLoginBody: z.object({ pseudo: z.string(), password: z.string() }),
