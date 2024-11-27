@@ -70,3 +70,10 @@ a#show-leaderboard {
   top: 10px;
   left: 10px;
 }
+
+#connect {
+  position : fixed;
+  top: 10px;
+  right: 10px;
+}
+
