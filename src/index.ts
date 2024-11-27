@@ -7,9 +7,11 @@ import { z } from "zod";
 import { createRoomController } from "./controllers/create-room";
 import { leaderboardController } from "./controllers/leaderboard";
 import { loginController } from "./controllers/login";
+import { logoutController } from "./controllers/logout";
 import { runRoomController } from "./controllers/run-room";
 import { userController } from "./controllers/user";
 import { Game } from "./game";
+import { authMiddleware } from "./middlewares/auth";
 import { types } from "./types";
 
 dotenv.config();
@@ -49,10 +51,11 @@ app.use(sessionMiddleware);
 app.use("/", express.static("static"));
 
 app.get("/api/leaderboard", leaderboardController);
-app.post("/api/room/create", createRoomController);
-app.post("/api/room/run", runRoomController);
+app.post("/api/room/create", authMiddleware, createRoomController);
+app.post("/api/room/run", authMiddleware, runRoomController);
 app.post("/api/auth/login", loginController);
-app.get("/api/auth/user", userController);
+app.get("/api/auth/user", authMiddleware, userController);
+app.post("/api/auth/logout", logoutController);
 
 io.engine.use(sessionMiddleware);
 io.on("connection", (socket) => {

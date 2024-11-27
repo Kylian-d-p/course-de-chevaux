@@ -3,11 +3,6 @@ import { games } from "..";
 import { types } from "../types";
 
 export const runRoomController = (req: Request, res: Response) => {
-  if (!req.session.user) {
-    res.status(403).json({ message: "Vous devez être connecté pour lancer une partie" });
-    return;
-  }
-
   const checkedBody = types.appRunBody.safeParse(req.body);
 
   if (!checkedBody.success) {
