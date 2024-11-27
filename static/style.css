@@ -71,9 +71,8 @@ a#show-leaderboard {
   left: 10px;
 }
 
-#connect {
-  position : fixed;
+#pseudo {
+  position: fixed;
   top: 10px;
   right: 10px;
 }
-

@@ -80,22 +80,16 @@ h1 {
   animation: gallop .2s ease-out infinite alternate;
 }
 
-.horse-track:nth-child(1) .horse {
-  left: 20%;
-}
 
 .horse-track:nth-child(2) .horse {
-  left: 45%;
   filter: hue-rotate(90deg);
 }
 
 .horse-track:nth-child(3) .horse {
-  left: 30%;
   filter: hue-rotate(180deg);
 }
 
 .horse-track:nth-child(4) .horse {
-  left: 10%;
   filter: hue-rotate(270deg);
 }
 
