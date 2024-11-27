@@ -1,18 +1,24 @@
+const pseudo = document.querySelector("#pseudo");
+const link = document.querySelector("#pseudo-link");
+
 fetch("/api/auth/user").then((res) => {
   res.json().then((data) => {
     if (!data.user) {
-      const link = document.createElement("a")
-      link.href = "/login/index.html"
-      const button = document.createElement("button")
-      button.textContent = "Connexion"
-      button.id = "connect"
-      link.append(button)
-      document.body.append(link)
+      link.href = "/login/index.html";
+      pseudo.textContent = "Connexion";
+      pseudo.removeAttribute("data-connected");
+    } else {
+      pseudo.textContent = data.user.pseudo;
+      link.href = "#";
+      pseudo.setAttribute("data-connected", "true");
     }
-    const button = document.createElement("button")
-    button.textContent = data.user.pseudo
-    button.id = "connect"
-    document.body.append(button)
-  })
+  });
 });
 
+pseudo.addEventListener("click", (event) => {
+  if (event.target.getAttribute("data-connected")) {
+    fetch("/api/auth/logout", {method: "POST"}).then(() => {
+      document.location.reload();
+    });
+  }
+});
