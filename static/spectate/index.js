@@ -92,16 +92,18 @@ if (typeof gameId !== "string") {
       }
     });
   });
-  
-  let totalCoins = 0
-  
+
+  let totalCoins = 0;
+
   const renderTotalCoins = () => {
-    document.querySelector("#jackpot").innerText = `Cagnotte totale: ${totalCoins}`
-  }
-  renderTotalCoins()
-  
+    document.querySelector(
+      "#jackpot"
+    ).innerText = `Cagnotte totale: ${totalCoins}`;
+  };
+  renderTotalCoins();
+
   socket.on("totalCoins update", (newTotalCoins) => {
-    totalCoins = newTotalCoins
-    renderTotalCoins()
+    totalCoins = newTotalCoins;
+    renderTotalCoins();
   });
 }
