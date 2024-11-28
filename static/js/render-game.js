@@ -10,7 +10,7 @@ export function renderGame(players, status, waitingText) {
   players.forEach((player, i) => {
     horseElements[i].classList.add("active");
     horseElements[i].style.left = `calc(${Math.min(player.progress, 100)}% - 100px)`;
-    horseElements[i].querySelector(".pseudo").innerText = player.name;
+    horseElements[i].querySelector(".pseudo").innerText = player.pseudo;
   });
 
   // Render leaderboard
@@ -23,7 +23,7 @@ export function renderGame(players, status, waitingText) {
   players
     .sort((a, b) => b.progress - a.progress)
     .forEach((player, i) => {
-      leaderboardPlayerElements[i].innerText = player.name;
+      leaderboardPlayerElements[i].innerText = player.pseudo;
     });
 
   // Render game status
