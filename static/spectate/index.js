@@ -37,11 +37,11 @@ if (typeof gameId !== "string") {
 
   bets.forEach((bet, i) => {
     bet.addEventListener("click", () => {
-      if (gameStatus === "stopped" || gameStatus === "preparing") {
+      if (gameStatus !== "running" || players.length <= i+1) {
         socket.emit("bet coins", {
           gameId: gameId,
           amount: 10,
-          playerPseudo: players[i].innerText,
+          playerId: players[i].id,
         });
       }
     });
