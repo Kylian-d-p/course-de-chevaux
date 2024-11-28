@@ -31,7 +31,7 @@ export function renderGame(players, status, waitingText) {
   const gameContainer = document.querySelector("#game-container");
   switch (status) {
     case "stopped":
-      waitingTextElement.innerText = "Faites vos paris ici";
+      waitingTextElement.innerText = waitingText;
       waitingTextElement.classList.remove("disabled");
       gameContainer.classList.remove("running");
       break;

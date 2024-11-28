@@ -3,28 +3,27 @@ import { renderGame } from "../js/render-game.js";
 const searchParams = new URLSearchParams(window.location.search);
 
 const gameId = searchParams.get("id");
+const WAINTING_TEXT = "Faites vos paris maintenant !"
 
-let players = []
-let status = "stopped"
 
 if (typeof gameId !== "string") {
   document.location.replace(`/index.html`);
 } else {
   const socket = io();
   let gameStatus = "stopped";
-
+  let players = []
   socket.emit("request room spectate access", {
     id: gameId,
   });
 
   socket.on("players update", (newPlayers) => {
     players = newPlayers
-    renderGame(players, status, "Faites vos paris ici !");
+    renderGame(players, gameStatus, WAINTING_TEXT);
   });
 
   socket.on("game status", ({ newStatus }) => {
-    status = newStatus
-    renderGame(players, status, "Faites vos paris ici !");
+    gameStatus = newStatus
+    renderGame(players, gameStatus, WAINTING_TEXT);
   });
 
   socket.on("info", (data) => {
@@ -42,7 +41,7 @@ if (typeof gameId !== "string") {
         socket.emit("bet coins", {
           gameId: gameId,
           amount: 10,
-          playerPseudo: horseElements[i].querySelector(".pseudo").innerText,
+          playerPseudo: players[i].innerText,
         });
       }
     });
