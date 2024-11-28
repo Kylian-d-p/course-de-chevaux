@@ -14,7 +14,6 @@ export class Game {
   private readyForNext = true;
   private io: SocketIoServer;
   private startTime = new Date();
-  private bets: {playerId: string, bettors: {bettorId: string, amount: number}[]}[] = [];
 
   constructor(params: z.infer<typeof types.gameConstructorParams>) {
     this.id = uuid();
@@ -42,10 +41,15 @@ export class Game {
   }
 
   betCoins(bettorId: string, playerId: string, amount: number) {
-    // let betIndex = this.bets.findIndex(bet => bet.playerId === playerId)
-    // if (!bet) {
-    //   bet = 
-    // }
+    const playerIndex = this.players.findIndex((player) => player.getId() === playerId);
+
+    if (playerIndex < 0) {
+      return false;
+    }
+
+    this.players[playerIndex].bet(bettorId, amount);
+    this.sendJackpot();
+    return true;
   }
 
   run() {
@@ -77,18 +81,18 @@ export class Game {
 
     const dbPlayer = await prisma.players.findUnique({
       where: {
-        id
-      }
-    })
+        id,
+      },
+    });
 
     if (!dbPlayer) {
-      return false
+      return false;
     }
 
     this.players.push(new Player(dbPlayer.pseudo, dbPlayer.id));
     this.sendPlayersUpdate();
     this.sendStatus();
-    return true
+    return true;
   }
 
   async addPlayerProgress(params: z.infer<typeof types.gameAddPlayerProgressParams>) {
@@ -121,7 +125,7 @@ export class Game {
           if (dbPlayer && (typeof dbPlayer.bestTime !== "number" || currentTime < dbPlayer.bestTime)) {
             await prisma.players.update({
               where: {
-                id: player.getId()
+                id: player.getId(),
               },
               data: {
                 bestTime: currentTime,
@@ -151,13 +155,13 @@ export class Game {
     this.sendPlayersUpdate();
   }
 
-  private sendPlayersUpdate() {
+  sendPlayersUpdate() {
     this.io.to(`play-${this.id}`).emit(
       "players update",
       this.players.map((player) => ({
         pseudo: player.getPseudo(),
         progress: player.getProgress(),
-        id: player.getId()
+        id: player.getId(),
       }))
     );
 
@@ -166,8 +170,25 @@ export class Game {
       this.players.map((player) => ({
         pseudo: player.getPseudo(),
         progress: player.getProgress(),
-        id: player.getId()
+        id: player.getId(),
       }))
+    );
+  }
+
+  sendStatus() {
+    this.io.to(`play-${this.id}`).emit("game status", { status: this.status });
+    this.io.to(`spectate-${this.id}`).emit("game status", { status: this.status });
+  }
+
+  sendJackpot() {
+    this.io.to(`spectate-${this.id}`).emit(
+      "totalCoins update",
+      this.players.map((player) =>
+        player
+          .getBets()
+          .map((bet) => bet.amount)
+          .reduce((previous, current) => previous + current, 0)
+      )
     );
   }
 
@@ -180,10 +201,5 @@ export class Game {
         this.readyForNext = true;
       }, 3000);
     }
-  }
-
-  private sendStatus() {
-    this.io.to(`play-${this.id}`).emit("game status", { status: this.status });
-    this.io.to(`spectate-${this.id}`).emit("game status", { status: this.status });
   }
 }

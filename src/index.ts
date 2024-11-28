@@ -12,6 +12,7 @@ import { runRoomController } from "./controllers/run-room";
 import { userController } from "./controllers/user";
 import { Game } from "./game";
 import { authMiddleware } from "./middlewares/auth";
+import { Player } from "./player";
 import { types } from "./types";
 
 dotenv.config();
@@ -149,6 +150,9 @@ io.on("connection", (socket) => {
     }
 
     socket.join(`spectate-${game.getId()}`);
+    game.sendPlayersUpdate();
+    game.sendJackpot();
+    Player.sendCoins(req.session.user.id, socket)
   });
 
   socket.on("add progress", (params: z.infer<typeof types.socketAddProgress>) => {
@@ -166,18 +170,22 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("bet coins", (params: z.infer<typeof types.socketBetCoins>) => {
+  socket.on("bet coins", async (params: z.infer<typeof types.socketBetCoins>) => {
     const checkedParams = types.socketBetCoins.safeParse(params);
 
     if (!checkedParams.success) {
       return socket.emit("info", { message: "Les paramètres de pari de pièces sont incorrects" });
     }
 
-    const { gameId, amount } = checkedParams.data;
+    const { gameId, amount, playerId } = checkedParams.data;
 
     const game = games.find((game) => game.getId() === gameId);
     if (game && req.session.user) {
-      game;
+      if (!game.betCoins(req.session.user.id, playerId, amount)) {
+        socket.emit("info", { message: "Impossible de parier sur ce joueur" });
+        return;
+      }
+      Player.sendCoins(req.session.user.id, socket);
     }
   });
 
