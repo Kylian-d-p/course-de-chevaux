@@ -1,4 +1,4 @@
-export function renderGame(players, status) {
+export function renderGame(players, status, waitingText) {
   // Render horses
   const horseElements = document.querySelectorAll(".horse");
 

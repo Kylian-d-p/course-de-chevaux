@@ -4,6 +4,9 @@ const searchParams = new URLSearchParams(window.location.search);
 
 const gameId = searchParams.get("id");
 
+let players = []
+let status = "stopped"
+
 if (typeof gameId !== "string") {
   document.location.replace(`/index.html`);
 } else {
@@ -14,11 +17,14 @@ if (typeof gameId !== "string") {
     id: gameId,
   });
 
-  socket.on("players update", (players) => {
-    renderGame(players);
+  socket.on("players update", (newPlayers) => {
+    players = newPlayers
+    renderGame(players, status, "Faites vos paris ici !");
   });
 
-  socket.on("game status", ({ status }) => {
+  socket.on("game status", ({ newStatus }) => {
+    status = newStatus
+    renderGame(players, status, "Faites vos paris ici !");
   });
 
   socket.on("info", (data) => {
