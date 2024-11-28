@@ -115,9 +115,40 @@ io.on("connection", (socket) => {
       }
     }
 
-    socket.data.name = req.session.user.pseudo;
     socket.join(`play-${game.getId()}`);
     game.addPlayer({ id: req.session.user.id });
+  });
+
+  socket.on("request room spectate access", (params: z.infer<typeof types.socketRequestRoomAccess>) => {
+    if (!req.session.user) {
+      return socket.emit("info", { message: "Vous devez être connecté", needAuth: true });
+    }
+    const checkedParams = types.socketRequestRoomAccess.safeParse(params);
+
+    if (!checkedParams.success) {
+      return socket.emit("info", {
+        message: "Impossible de rejoindre cette partie",
+      });
+    }
+
+    const { id } = checkedParams.data;
+
+    let game = games.find((game) => game.getId() === id);
+    if (!game) {
+      return socket.emit("info", {
+        message: "Cette partie n'existe pas",
+      });
+    } else {
+      for (const player of game.getPlayers()) {
+        if (player.getId() === req.session.user.id) {
+          return socket.emit("info", {
+            message: "Vous ne pouvez pas rejoindre une partie en tant que spectateur si vous êtes joueur de cette même partie",
+          });
+        }
+      }
+    }
+
+    socket.join(`spectate-${game.getId()}`);
   });
 
   socket.on("add progress", (params: z.infer<typeof types.socketAddProgress>) => {
