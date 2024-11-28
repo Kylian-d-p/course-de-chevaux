@@ -70,7 +70,7 @@ io.on("connection", (socket) => {
     });
   });
 
-  socket.on("request room access", (params: z.infer<typeof types.socketRequestRoomAccess>) => {
+  socket.on("request room play access", (params: z.infer<typeof types.socketRequestRoomAccess>) => {
     if (!req.session.user) {
       return socket.emit("info", { message: "Vous devez être connecté", needAuth: true });
     }
@@ -144,9 +144,9 @@ io.on("connection", (socket) => {
 
     const { gameId, amount } = checkedParams.data;
 
-    const game = games.find(game => game.getId() === gameId)
+    const game = games.find((game) => game.getId() === gameId);
     if (game && req.session.user) {
-      game
+      game;
     }
   });
 

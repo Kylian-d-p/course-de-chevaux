@@ -16,7 +16,7 @@ if (typeof gameId !== "string") {
   const socket = io();
   let gameStatus = "stopped";
 
-  socket.emit("request room access", {
+  socket.emit("request room play access", {
     id: gameId,
   });
 
@@ -35,7 +35,7 @@ if (typeof gameId !== "string") {
       horseElements[i].querySelector(".pseudo").innerText = player.name;
     });
 
-    leaderboardPlayerElements.forEach(leaderboardPlayerElement => {
+    leaderboardPlayerElements.forEach((leaderboardPlayerElement) => {
       leaderboardPlayerElement.innerText = "";
     });
 
