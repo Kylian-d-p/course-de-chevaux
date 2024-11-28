@@ -32,6 +32,10 @@ h3 {
   text-decoration: underline 2px;
 }
 
+#code-game {
+  margin-left: 10px;
+}
+
 @media screen and (max-width: 768px) {
   #game-container {
     flex-direction: column;
