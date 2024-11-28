@@ -47,7 +47,7 @@ if (typeof gameId !== "string") {
   });
 
   socket.on("game status", ({ status }) => {
-    const pressToStartElement = document.querySelector("#press-to-start");
+    const pressToStartElement = document.querySelector("#waiting-text");
     const gameContainer = document.querySelector("#game-container");
     switch (status) {
       case "stopped":

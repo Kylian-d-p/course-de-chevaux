@@ -7,9 +7,10 @@
   <title>Regarder et parier au jeu des chevaux</title>
   <link rel="stylesheet" href="/globals.css">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/css/in-game.css">
   <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
   <script src="/socket.io/socket.io.js"></script>
-  <script src="index.js" defer></script>
+  <script src="index.js" type="module"></script>
 </head>
 
 <body>
@@ -24,19 +25,31 @@
       <div id="track">
         <div class="horses">
           <div class="horse-track">
-            <img class="horse" src="/assets/cheval.png" width="100" height="100" alt="Cheval">
+            <div class="horse">
+              <img src="/assets/cheval.png" width="100" height="66" alt="Cheval">
+              <span class="pseudo"></span>
+            </div>
             <div class="ground"></div>
           </div>
           <div class="horse-track">
-            <img class="horse" src="/assets/cheval.png" width="100" height="100" alt="Cheval">
+            <div class="horse">
+              <img src="/assets/cheval.png" width="100" height="66" alt="Cheval">
+              <span class="pseudo"></span>
+            </div>
             <div class="ground"></div>
           </div>
           <div class="horse-track">
-            <img class="horse" src="/assets/cheval.png" width="100" height="100" alt="Cheval">
+            <div class="horse">
+              <img src="/assets/cheval.png" width="100" height="66" alt="Cheval">
+              <span class="pseudo"></span>
+            </div>
             <div class="ground"></div>
           </div>
           <div class="horse-track">
-            <img class="horse" src="/assets/cheval.png" width="100" height="100" alt="Cheval">
+            <div class="horse">
+              <img src="/assets/cheval.png" width="100" height="66" alt="Cheval">
+              <span class="pseudo"></span>
+            </div>
             <div class="ground"></div>
           </div>
         </div>
@@ -44,7 +57,7 @@
       </div>
       <div id="stats">
         <h3>Classement :</h3>
-        <ol>
+        <ol id="leaderboard-list">
           <li>
             Joueur 1
           </li>
@@ -59,8 +72,9 @@
           </li>
         </ol>
       </div>
+      <p id="waiting-text">C'est l'heure des paris !</p>
     </div>
-    <div id="press-to-start">
+    <div id="bet-container">
       <p id="jackpot"></p>
       <div id="bets">
         <button class="bet">Parier +10 coins sur J1</button>
