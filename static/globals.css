@@ -49,14 +49,18 @@ button {
   text-align: left;
 }
 
-button:hover {
+button:hover:not(:disabled) {
   transition: .3s;
   animation: bounce .4s;
   transition-timing-function: cubic-bezier(0.2, 0.89, 0.65, 1.74);
 }
 
-button:active {
+button:active:not(:disabled) {
   transform: scale(0.95);
+}
+
+button:disabled {
+  filter: grayscale(1);
 }
 
 input {
@@ -71,6 +75,13 @@ input {
 
 input:focus {
   outline: 2px solid black;
+}
+
+#back-home {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 9999;
 }
 
 @keyframes bounce {
