@@ -37,7 +37,7 @@ if (typeof gameId !== "string") {
 
   bets.forEach((bet, i) => {
     bet.addEventListener("click", () => {
-      if (gameStatus !== "running" || players.length <= i+1) {
+      if (gameStatus !== "running" && players.length > i+1) {
         socket.emit("bet coins", {
           gameId: gameId,
           amount: 10,
