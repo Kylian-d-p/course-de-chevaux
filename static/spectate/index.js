@@ -21,7 +21,7 @@ if (typeof gameId !== "string") {
     renderGame(players, gameStatus, WAINTING_TEXT);
   });
 
-  socket.on("game status", ({ newStatus }) => {
+  socket.on("game status", ({ status: newStatus }) => {
     gameStatus = newStatus
     renderGame(players, gameStatus, WAINTING_TEXT);
   });
