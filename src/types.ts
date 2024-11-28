@@ -39,6 +39,7 @@ export const types = {
   socketBetCoins: z.object({
     gameId: z.string(),
     amount: z.number(),
+    playerId: z.string(),
   }),
   gameAddPlayer: z.object({ id: z.string() }),
   gameRemovePlayer: z.object({ id: z.string() }),
