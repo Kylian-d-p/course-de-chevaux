@@ -55,6 +55,8 @@ h3 {
 }
 
 #wallet {
+  display: flex;
+  gap: 10px;
   color: #fff;
   gap: 10px;
   font-size: 1.25rem;
