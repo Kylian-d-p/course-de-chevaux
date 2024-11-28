@@ -3,14 +3,20 @@ import { types } from "./types";
 
 export class Player {
   private progress = 0;
-  private name: string;
+  private pseudo: string;
+  private id: string;
 
-  constructor(name: string) {
-    this.name = name;
+  constructor(pseudo: string, id: string) {
+    this.pseudo = pseudo;
+    this.id = id
   }
 
-  getName() {
-    return this.name;
+  getId() {
+    return this.id
+  }
+
+  getPseudo() {
+    return this.pseudo;
   }
 
   getProgress() {

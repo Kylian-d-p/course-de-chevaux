@@ -19,7 +19,7 @@ export const runRoomController = (req: Request, res: Response) => {
     return;
   }
 
-  const player = game.getPlayers().find((player) => player.getName() === req.session.user!.pseudo);
+  const player = game.getPlayers().find((player) => player.getId() === req.session.user!.id);
 
   if (!player) {
     res.status(403).json({ message: "Vous ne participez pas à cette partie" });

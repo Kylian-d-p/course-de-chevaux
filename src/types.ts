@@ -26,7 +26,7 @@ export const types = {
     io: z.custom<SocketIoServer>(),
   }),
   gameAddPlayerProgressParams: z.object({
-    playerPseudo: z.string(),
+    playerId: z.string(),
     increment: z.number(),
   }),
   playerAddProgressParams: z.object({ increment: z.number() }),
@@ -40,8 +40,8 @@ export const types = {
     gameId: z.string(),
     amount: z.number(),
   }),
-  gameAddPlayer: z.object({ name: z.string() }),
-  gameRemovePlayer: z.object({ name: z.string() }),
+  gameAddPlayer: z.object({ id: z.string() }),
+  gameRemovePlayer: z.object({ id: z.string() }),
   appLoginBody: z.object({ pseudo: z.string(), password: z.string() }),
   appRunBody: z.object({
     gameId: z.string(),

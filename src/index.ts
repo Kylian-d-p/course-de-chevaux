@@ -107,7 +107,7 @@ io.on("connection", (socket) => {
       });
     } else {
       for (const player of game.getPlayers()) {
-        if (player.getName() === req.session.user.pseudo) {
+        if (player.getPseudo() === req.session.user.pseudo) {
           return socket.emit("info", {
             message: `Vous êtes déjà dans cette partie`,
           });
@@ -117,7 +117,7 @@ io.on("connection", (socket) => {
 
     socket.data.name = req.session.user.pseudo;
     socket.join(`play-${game.getId()}`);
-    game.addPlayer({ name: req.session.user.pseudo });
+    game.addPlayer({ id: req.session.user.id });
   });
 
   socket.on("add progress", (params: z.infer<typeof types.socketAddProgress>) => {
@@ -131,7 +131,7 @@ io.on("connection", (socket) => {
 
     const game = games.find((game) => game.getId() === gameId);
     if (game && req.session.user) {
-      game.addPlayerProgress({ increment: 0.5, playerPseudo: req.session.user.pseudo });
+      game.addPlayerProgress({ increment: 0.5, playerId: req.session.user.id });
     }
   });
 
@@ -159,7 +159,8 @@ io.on("connection", (socket) => {
         }
         const gameIndex = games.findIndex((game) => game.getId() === temp[1]);
         if (gameIndex !== -1) {
-          games[gameIndex].removePlayer({ name: socket.data.name });
+          if (!req.session.user) return;
+          games[gameIndex].removePlayer({ id: req.session.user.id });
           if (games[gameIndex].getPlayers().length === 0) {
             setTimeout(() => {
               if (games[gameIndex].getPlayers().length === 0) {

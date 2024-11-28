@@ -27,7 +27,7 @@ export class Game {
     const { players, io } = checkedParams.data;
 
     for (const player of players) {
-      this.addPlayer({ name: player });
+      this.addPlayer({ id: player });
     }
 
     this.io = io;
@@ -66,18 +66,29 @@ export class Game {
     }
   }
 
-  addPlayer(params: z.infer<typeof types.gameAddPlayer>) {
+  async addPlayer(params: z.infer<typeof types.gameAddPlayer>) {
     const checkedParams = types.gameAddPlayer.safeParse(params);
 
     if (!checkedParams.success) {
       throw new Error("Les paramètres pour ajouter un joueur sont invalides.");
     }
 
-    const { name } = checkedParams.data;
+    const { id } = checkedParams.data;
 
-    this.players.push(new Player(name));
+    const dbPlayer = await prisma.players.findUnique({
+      where: {
+        id
+      }
+    })
+
+    if (!dbPlayer) {
+      return false
+    }
+
+    this.players.push(new Player(dbPlayer.pseudo, dbPlayer.id));
     this.sendPlayersUpdate();
     this.sendStatus();
+    return true
   }
 
   async addPlayerProgress(params: z.infer<typeof types.gameAddPlayerProgressParams>) {
@@ -88,9 +99,9 @@ export class Game {
     }
 
     if (this.status === "running") {
-      const { playerPseudo, increment } = checkedParams.data;
+      const { playerId, increment } = checkedParams.data;
 
-      const player = this.players.find((player) => player.getName() === playerPseudo);
+      const player = this.players.find((player) => player.getId() === playerId);
 
       if (player) {
         player.addProgress({ increment });
@@ -103,14 +114,14 @@ export class Game {
 
           const dbPlayer = await prisma.players.findUnique({
             where: {
-              pseudo: player.getName(),
+              id: player.getId(),
             },
           });
 
           if (dbPlayer && (typeof dbPlayer.bestTime !== "number" || currentTime < dbPlayer.bestTime)) {
             await prisma.players.update({
               where: {
-                pseudo: player.getName(),
+                id: player.getId()
               },
               data: {
                 bestTime: currentTime,
@@ -129,9 +140,9 @@ export class Game {
       throw new Error("Les paramètres pour supprimer un joueur sont invalides.");
     }
 
-    const { name } = checkedParams.data;
+    const { id } = checkedParams.data;
 
-    const playerIndex = this.players.findIndex((player) => player.getName() === name);
+    const playerIndex = this.players.findIndex((player) => player.getId() === id);
 
     if (playerIndex !== -1) {
       this.players.splice(playerIndex, 1);
@@ -144,8 +155,9 @@ export class Game {
     this.io.to(`play-${this.id}`).emit(
       "players update",
       this.players.map((player) => ({
-        name: player.getName(),
+        pseudo: player.getPseudo(),
         progress: player.getProgress(),
+        id: player.getId()
       }))
     );
   }
