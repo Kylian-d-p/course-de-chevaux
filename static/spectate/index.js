@@ -11,10 +11,10 @@ if (typeof gameId !== "string") {
 
   let gameStatus = "stopped";
   let players = [];
-  
+
   const betEventListener = (e) => {
     const i = Array.prototype.indexOf.call(e.target.parentElement.children, e.target);
-    
+
     if (gameStatus !== "running" && players.length >= i + 1) {
       socket.emit("bet coins", {
         gameId: gameId,
@@ -23,7 +23,7 @@ if (typeof gameId !== "string") {
       });
     }
   };
-  
+
   socket.emit("request room spectate access", {
     id: gameId,
   });
