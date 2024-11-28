@@ -184,5 +184,6 @@ export class Game {
 
   private sendStatus() {
     this.io.to(`play-${this.id}`).emit("game status", { status: this.status });
+    this.io.to(`spectate-${this.id}`).emit("game status", { status: this.status });
   }
 }
