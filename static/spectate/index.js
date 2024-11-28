@@ -1,4 +1,4 @@
-import { renderGame } from "../js/render-horses.js";
+import { renderGame } from "../js/render-game.js";
 
 const searchParams = new URLSearchParams(window.location.search);
 
