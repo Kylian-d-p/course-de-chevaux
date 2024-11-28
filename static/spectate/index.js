@@ -67,4 +67,9 @@ if (typeof gameId !== "string") {
     totalCoins = newTotalCoins;
     renderTotalCoins();
   });
+
+  const wallet = document.querySelector("#wallet-value")
+  socket.on("my coins", (myCoins) => {
+    wallet.textContent = myCoins
+  }) 
 }

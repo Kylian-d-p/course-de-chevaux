@@ -54,6 +54,18 @@ h3 {
   text-decoration: underline 2px;
 }
 
+#wallet {
+  color: #fff;
+  gap: 10px;
+  font-size: 1.25rem;
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background-color: #00000064;
+  padding: 10px;
+  border-radius: 10px;
+}
+
 @keyframes gallop {
   from {
     transform: rotate(10deg);
