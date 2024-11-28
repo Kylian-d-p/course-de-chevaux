@@ -160,6 +160,15 @@ export class Game {
         id: player.getId()
       }))
     );
+
+    this.io.to(`spectate-${this.id}`).emit(
+      "players update",
+      this.players.map((player) => ({
+        pseudo: player.getPseudo(),
+        progress: player.getProgress(),
+        id: player.getId()
+      }))
+    );
   }
 
   private changeStatus(newStatus: typeof this.status) {
