@@ -14,13 +14,6 @@ header {
   justify-content: center;
 }
 
-#back-home {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  z-index: 100;
-}
-
 h1 {
   color: #fff;
   background-color: #00000064;
@@ -66,6 +59,7 @@ h3 {
   background-color: #00000064;
   padding: 10px;
   border-radius: 10px;
+  z-index: 9999;
 }
 
 @keyframes gallop {

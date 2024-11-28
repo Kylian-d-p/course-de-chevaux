@@ -14,13 +14,6 @@ header {
   justify-content: center;
 }
 
-#back-home {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  z-index: 100;
-}
-
 h1 {
   color: #fff;
   background-color: #00000064;

@@ -14,13 +14,6 @@ h1 {
   padding: 10px;
 }
 
-#back-home {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  z-index: 100;
-}
-
 #error-message {
   color: rgb(255, 111, 111);
   display: none;

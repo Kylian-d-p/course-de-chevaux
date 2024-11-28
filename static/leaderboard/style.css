@@ -11,12 +11,6 @@ main{
   background-repeat: no-repeat;
 }
 
-#back-home {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-}
-
 #leaderboard {
   display: flex;
   flex-direction: column;
