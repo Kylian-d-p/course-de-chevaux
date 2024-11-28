@@ -1,6 +1,6 @@
 import { renderGame } from "../js/render-game.js";
 
-const WAINTING_TEXT = "Appuyer sur espace pour commencer";
+const WAITING_TEXT = "Appuyer sur espace pour commencer";
 const searchParams = new URLSearchParams(window.location.search);
 
 const gameId = searchParams.get("id");
@@ -36,13 +36,13 @@ if (typeof gameId !== "string") {
 
   socket.on("players update", (newPlayers) => {
     players = newPlayers;
-    renderGame(players, gameStatus, WAINTING_TEXT);
+    renderGame(players, gameStatus, WAITING_TEXT);
     console.log(gameStatus);
   });
 
   socket.on("game status", ({ status: newStatus }) => {
     gameStatus = newStatus;
-    renderGame(players, gameStatus, WAINTING_TEXT);
+    renderGame(players, gameStatus, WAITING_TEXT);
   });
 
   socket.on("info", (data) => {

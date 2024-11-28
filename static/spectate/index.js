@@ -2,7 +2,7 @@ import { renderGame } from "../js/render-game.js";
 
 const searchParams = new URLSearchParams(window.location.search);
 const gameId = searchParams.get("id");
-const WAINTING_TEXT = "Faites vos paris maintenant !";
+const WAITING_TEXT = "Faites vos paris maintenant !";
 
 if (typeof gameId !== "string") {
   document.location.replace(`/index.html`);
@@ -33,7 +33,7 @@ if (typeof gameId !== "string") {
 
   socket.on("players update", (newPlayers) => {
     players = newPlayers;
-    renderGame(players, gameStatus, WAINTING_TEXT);
+    renderGame(players, gameStatus, WAITING_TEXT);
 
     const bets = document.querySelectorAll(".bet");
     bets.forEach((bet, i) => {
@@ -53,7 +53,7 @@ if (typeof gameId !== "string") {
 
   socket.on("game status", ({ status: newStatus }) => {
     gameStatus = newStatus;
-    renderGame(players, gameStatus, WAINTING_TEXT);
+    renderGame(players, gameStatus, WAITING_TEXT);
   });
 
   socket.on("info", (data) => {
