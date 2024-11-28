@@ -13,7 +13,10 @@ if (typeof gameId !== "string") {
   let players = [];
 
   const betEventListener = (e) => {
-    const i = Array.prototype.indexOf.call(e.target.parentElement.children, e.target);
+    const i = Array.prototype.indexOf.call(
+      e.target.parentElement.children,
+      e.target
+    );
 
     if (gameStatus !== "running" && players.length >= i + 1) {
       socket.emit("bet coins", {
@@ -33,8 +36,12 @@ if (typeof gameId !== "string") {
     renderGame(players, gameStatus, WAINTING_TEXT);
 
     const bets = document.querySelectorAll(".bet");
-    bets.forEach((bet) => {
+    bets.forEach((bet, i) => {
       bet.removeEventListener("click", betEventListener);
+      bet.removeAttribute("disabled");
+      if (i + 1 > players.length) {
+        bet.setAttribute("disabled", "");
+      }
     });
 
     if (gameStatus !== "running") {
@@ -52,14 +59,18 @@ if (typeof gameId !== "string") {
   socket.on("info", (data) => {
     alert(data.message);
     if (data.needAuth) {
-      document.location.href = `/login/index.html?redirectTo=${encodeURIComponent(document.location.href)}`;
+      document.location.href = `/login/index.html?redirectTo=${encodeURIComponent(
+        document.location.href
+      )}`;
     }
   });
 
   let totalCoins = 0;
 
   const renderTotalCoins = () => {
-    document.querySelector("#jackpot").innerText = `Cagnotte totale: ${totalCoins}`;
+    document.querySelector(
+      "#jackpot"
+    ).innerText = `Cagnotte totale: ${totalCoins}`;
   };
   renderTotalCoins();
 
@@ -68,8 +79,8 @@ if (typeof gameId !== "string") {
     renderTotalCoins();
   });
 
-  const wallet = document.querySelector("#wallet-value")
+  const wallet = document.querySelector("#wallet-value");
   socket.on("my coins", (myCoins) => {
-    wallet.textContent = myCoins
-  }) 
+    wallet.textContent = myCoins;
+  });
 }
