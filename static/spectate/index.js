@@ -12,18 +12,6 @@ if (typeof gameId !== "string") {
   let gameStatus = "stopped";
   let players = [];
 
-  const betEventListener = (e) => {
-    const i = Array.prototype.indexOf.call(e.target.parentElement.children, e.target);
-
-    if (gameStatus !== "running" && players.length >= i + 1) {
-      socket.emit("bet coins", {
-        gameId: gameId,
-        amount: 10,
-        playerId: players[i].id,
-      });
-    }
-  };
-
   socket.emit("request room spectate access", {
     id: gameId,
   });
@@ -34,23 +22,34 @@ if (typeof gameId !== "string") {
 
     const bets = document.querySelectorAll(".bet");
     bets.forEach((bet, i) => {
-      bet.removeEventListener("click", betEventListener);
+      if (gameStatus !== "running") {
+        bet.onclick = (e) => {
+          const i = Array.prototype.indexOf.call(e.target.parentElement.children, e.target);
+
+          if (gameStatus !== "running" && players.length >= i + 1) {
+            socket.emit("bet coins", {
+              gameId: gameId,
+              amount: 10,
+              playerId: players[i].id,
+            });
+          }
+        };
+      } else {
+        bet.onclick = null;
+      }
       bet.removeAttribute("disabled");
       if (i + 1 > players.length) {
         bet.setAttribute("disabled", "");
       }
     });
-
-    if (gameStatus !== "running") {
-      bets.forEach((bet) => {
-        bet.addEventListener("click", betEventListener);
-      });
-    }
   });
 
   socket.on("game status", ({ status: newStatus }) => {
     gameStatus = newStatus;
     renderGame(players, gameStatus, WAITING_TEXT);
+    if (newStatus === "stopped") {
+      document.location.reload();
+    }
   });
 
   socket.on("info", (data) => {
@@ -68,6 +67,7 @@ if (typeof gameId !== "string") {
   renderTotalCoins();
 
   socket.on("totalCoins update", (newTotalCoins) => {
+    console.log(newTotalCoins);
     totalCoins = newTotalCoins;
     renderTotalCoins();
   });
