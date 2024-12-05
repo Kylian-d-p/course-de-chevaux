@@ -155,7 +155,7 @@ io.on("connection", (socket) => {
     Player.sendCoins(req.session.user.id, socket);
   });
 
-  socket.on("add progress", (params: z.infer<typeof types.socketAddProgress>) => {
+  socket.on("add progress", async (params: z.infer<typeof types.socketAddProgress>) => {
     const checkedParams = types.socketAddProgress.safeParse(params);
 
     if (!checkedParams.success) {
@@ -166,7 +166,7 @@ io.on("connection", (socket) => {
 
     const game = games.find((game) => game.getId() === gameId);
     if (game && req.session.user) {
-      game.addPlayerProgress({ increment: 0.5, playerId: req.session.user.id });
+      await game.addPlayerProgress({ increment: 0.5, playerId: req.session.user.id });
     }
   });
 

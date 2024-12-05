@@ -31,6 +31,10 @@ export class Player {
     return this.bets;
   }
 
+  clearBets() {
+    this.bets = [];
+  }
+
   async bet(bettorId: string, amount: number) {
     let betIndex = this.bets.findIndex((bet) => bet.bettorId === bettorId);
     if (betIndex < 0) {

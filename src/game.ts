@@ -112,26 +112,7 @@ export class Game {
         this.sendPlayersUpdate();
 
         if (player.getProgress() >= 100) {
-          const currentTime = dayjs().diff(this.startTime);
-          this.changeStatus("stopped");
-          this.io.to(`play-${this.id}`).emit("game status", { status: "stopped" });
-
-          const dbPlayer = await prisma.players.findUnique({
-            where: {
-              id: player.getId(),
-            },
-          });
-
-          if (dbPlayer && (typeof dbPlayer.bestTime !== "number" || currentTime < dbPlayer.bestTime)) {
-            await prisma.players.update({
-              where: {
-                id: player.getId(),
-              },
-              data: {
-                bestTime: currentTime,
-              },
-            });
-          }
+          await this.stop(player);
         }
       }
     }
@@ -171,6 +152,7 @@ export class Game {
         pseudo: player.getPseudo(),
         progress: player.getProgress(),
         id: player.getId(),
+        bets: player.getBets(),
       }))
     );
   }
@@ -181,15 +163,7 @@ export class Game {
   }
 
   sendJackpot() {
-    this.io.to(`spectate-${this.id}`).emit(
-      "totalCoins update",
-      this.players.map((player) =>
-        player
-          .getBets()
-          .map((bet) => bet.amount)
-          .reduce((previous, current) => previous + current, 0)
-      )
-    );
+    this.io.to(`spectate-${this.id}`).emit("totalCoins update", this.getJackpot());
   }
 
   private changeStatus(newStatus: typeof this.status) {
@@ -201,5 +175,56 @@ export class Game {
         this.readyForNext = true;
       }, 3000);
     }
+  }
+
+  private getJackpot() {
+    return this.players
+      .map((player) =>
+        player
+          .getBets()
+          .map((bet) => bet.amount)
+          .reduce((previous, current) => previous + current, 0)
+      )
+      .reduce((previous, current) => previous + current, 0);
+  }
+
+  private async stop(winner: Player) {
+    const currentTime = dayjs().diff(this.startTime);
+    this.changeStatus("stopped");
+
+    const player = await prisma.players.findUnique({
+      where: {
+        id: winner.getId(),
+      },
+    });
+
+    if (player && (typeof player.bestTime !== "number" || currentTime < player.bestTime)) {
+      await prisma.players.update({
+        where: {
+          id: winner.getId(),
+        },
+        data: {
+          bestTime: currentTime,
+        },
+      });
+    }
+
+    const jackpot = this.getJackpot();
+    const winnersJackpot = winner.getBets().reduce((previous, current) => previous + current.amount, 0);
+    for (const bet of winner.getBets()) {
+      await prisma.players.update({
+        where: {
+          id: bet.bettorId,
+        },
+        data: {
+          coins: {
+            increment: (bet.amount / winnersJackpot) * jackpot,
+          },
+        },
+      });
+    }
+    this.players.forEach((player) => player.clearBets());
+    this.sendJackpot();
+    this.sendStatus();
   }
 }
