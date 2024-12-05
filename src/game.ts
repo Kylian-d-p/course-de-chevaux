@@ -40,14 +40,14 @@ export class Game {
     return this.players;
   }
 
-  betCoins(bettorId: string, playerId: string, amount: number) {
+  async betCoins(bettorId: string, playerId: string, amount: number) {
     const playerIndex = this.players.findIndex((player) => player.getId() === playerId);
 
     if (playerIndex < 0) {
       return false;
     }
 
-    this.players[playerIndex].bet(bettorId, amount);
+    await this.players[playerIndex].bet(bettorId, amount);
     this.sendJackpot();
     return true;
   }

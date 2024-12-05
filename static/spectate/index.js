@@ -13,10 +13,7 @@ if (typeof gameId !== "string") {
   let players = [];
 
   const betEventListener = (e) => {
-    const i = Array.prototype.indexOf.call(
-      e.target.parentElement.children,
-      e.target
-    );
+    const i = Array.prototype.indexOf.call(e.target.parentElement.children, e.target);
 
     if (gameStatus !== "running" && players.length >= i + 1) {
       socket.emit("bet coins", {
@@ -59,18 +56,14 @@ if (typeof gameId !== "string") {
   socket.on("info", (data) => {
     alert(data.message);
     if (data.needAuth) {
-      document.location.href = `/login/index.html?redirectTo=${encodeURIComponent(
-        document.location.href
-      )}`;
+      document.location.href = `/login/index.html?redirectTo=${encodeURIComponent(document.location.href)}`;
     }
   });
 
   let totalCoins = 0;
 
   const renderTotalCoins = () => {
-    document.querySelector(
-      "#jackpot"
-    ).innerText = `Cagnotte totale: ${totalCoins}`;
+    document.querySelector("#jackpot").innerText = `Cagnotte totale: ${totalCoins}`;
   };
   renderTotalCoins();
 

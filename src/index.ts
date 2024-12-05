@@ -152,7 +152,7 @@ io.on("connection", (socket) => {
     socket.join(`spectate-${game.getId()}`);
     game.sendPlayersUpdate();
     game.sendJackpot();
-    Player.sendCoins(req.session.user.id, socket)
+    Player.sendCoins(req.session.user.id, socket);
   });
 
   socket.on("add progress", (params: z.infer<typeof types.socketAddProgress>) => {
@@ -181,7 +181,7 @@ io.on("connection", (socket) => {
 
     const game = games.find((game) => game.getId() === gameId);
     if (game && req.session.user) {
-      if (!game.betCoins(req.session.user.id, playerId, amount)) {
+      if (!(await game.betCoins(req.session.user.id, playerId, amount))) {
         socket.emit("info", { message: "Impossible de parier sur ce joueur" });
         return;
       }
