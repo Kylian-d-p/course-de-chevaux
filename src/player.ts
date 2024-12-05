@@ -1,7 +1,7 @@
+import { Socket } from "socket.io";
 import { z } from "zod";
 import { prisma } from "./database";
 import { types } from "./types";
-import { Socket } from "socket.io";
 
 export class Player {
   private progress = 0;
@@ -32,12 +32,14 @@ export class Player {
   }
 
   async bet(bettorId: string, amount: number) {
-    const betIndex = this.bets.findIndex((bet) => bet.bettorId === bettorId);
+    let betIndex = this.bets.findIndex((bet) => bet.bettorId === bettorId);
     if (betIndex < 0) {
       this.bets.push({ bettorId, amount });
-      return;
+      betIndex = 0;
+    } else {
+      this.bets[betIndex] = { bettorId, amount: this.bets[betIndex].amount + amount };
     }
-    const playerUpdate = await prisma.players.update({
+    await prisma.players.update({
       where: {
         id: bettorId,
       },
@@ -47,10 +49,6 @@ export class Player {
         },
       },
     });
-
-    if (playerUpdate) {
-      this.bets[betIndex] = { bettorId, amount: this.bets[betIndex].amount + amount };
-    }
   }
 
   addProgress(params: z.infer<typeof types.playerAddProgressParams>) {
@@ -72,11 +70,11 @@ export class Player {
   static async sendCoins(playerId: string, socket: Socket) {
     const player = await prisma.players.findUnique({
       where: {
-        id: playerId
-      }
-    })
+        id: playerId,
+      },
+    });
     if (player) {
-      socket.emit("my coins", player.coins)
+      socket.emit("my coins", player.coins);
     }
   }
 }
