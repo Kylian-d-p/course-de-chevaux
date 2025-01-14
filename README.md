@@ -1,5 +1,7 @@
 # Course de chevaux
 
+Projet créé dans le cadre d'une évaluation HTML/CSS/JS pur.
+
 (une version en ligne est disponible à l'adresse suivante : [https://course-de-chevaux.onwapp.com](https://course-de-chevaux.onwapp.com))
 
 Ce site contient 5 pages :
