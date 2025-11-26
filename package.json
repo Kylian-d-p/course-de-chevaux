@@ -5,13 +5,21 @@
   "main": "./build/index.js",
   "scripts": {
     "start": "pnpm tsc && node build/index.js",
-    "dev": "pnpm dlx nodemon"
+    "dev": "pnpm dlx nodemon",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up -d",
+    "docker:dev:down": "docker-compose -f docker-compose.dev.yml down",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:restart": "docker-compose restart app"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^5.22.0",
+    "@prisma/adapter-mariadb": "^7.0.1",
+    "@prisma/client": "7.0.1",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dayjs": "^1.11.13",
@@ -29,7 +37,7 @@
     "@types/express": "^5.0.0",
     "@types/express-session": "^1.18.0",
     "nodemon": "^3.1.7",
-    "prisma": "^5.22.0",
+    "prisma": "7.0.1",
     "typescript": "^5.6.3"
   }
 }

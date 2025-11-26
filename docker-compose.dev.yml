@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  # Base de données MySQL pour développement
+  db:
+    image: mysql:8.0
+    container_name: course-chevaux-db-dev
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-course_de_chevaux}
+      MYSQL_USER: ${MYSQL_USER:-courseuser}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-coursepassword}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data_dev:/var/lib/mysql
+    networks:
+      - course-network-dev
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql_data_dev:
+    driver: local
+
+networks:
+  course-network-dev:
+    driver: bridge

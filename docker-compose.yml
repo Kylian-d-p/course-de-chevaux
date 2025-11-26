@@ -1,0 +1,50 @@
+services:
+  # Base de données MySQL
+  db:
+    image: mysql:8.0
+    hostname: db
+    container_name: course-chevaux-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-course_de_chevaux}
+      MYSQL_USER: ${MYSQL_USER:-courseuser}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-coursepassword}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - course-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${MYSQL_USER:-courseuser}", "-p${MYSQL_PASSWORD:-coursepassword}"]
+      interval: 5s
+      timeout: 2s
+      retries: 20
+
+  # Application Node.js
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: course-chevaux-app
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    stdin_open: true
+    tty: true
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - course-network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  course-network:
+    driver: bridge
