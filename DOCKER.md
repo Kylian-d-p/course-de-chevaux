@@ -9,13 +9,7 @@
 
 ### 1. Configuration de l'environnement
 
-Copiez le fichier d'exemple et modifiez les valeurs selon vos besoins :
-
-```bash
-cp .env.example .env
-```
-
-**Important** : Changez `SESSION_SECRET` en production !
+Créez le fichier `.env` à la racine du projet.
 
 ### 2. Développement avec Docker
 
