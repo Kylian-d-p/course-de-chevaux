@@ -10,6 +10,17 @@
 ### 1. Configuration de l'environnement
 
 Créez le fichier `.env` à la racine du projet.
+```
+PORT=xxx
+DATABASE_URL=xxx
+SESSION_SECRET=xxx
+
+# Docker MySQL credentials
+MYSQL_ROOT_PASSWORD=xxx
+MYSQL_DATABASE=xxx
+MYSQL_USER=xxx
+MYSQL_PASSWORD=xxx
+```
 
 ### 2. Développement avec Docker
 
